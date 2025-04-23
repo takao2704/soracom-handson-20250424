@@ -60,6 +60,28 @@ python --version
 
 2. Python 3.12以上がインストールされていることを確認します。インストールされていない場合は、[Python公式サイト](https://www.python.org/downloads/)からダウンロードしてインストールしてください。
 
+
+## 0.3 ハンズオンリポジトリダウンロード
+
+### Gitのインストール確認
+
+1. ターミナルを開き、以下のコマンドを実行してGitのバージョンを確認します：
+
+```bash
+git --version
+```
+
+2. Gitがインストールされていない場合は、[Git公式サイト](https://git-scm.com/downloads)からダウンロードしてインストールしてください。
+
+### リポジトリのクローン
+
+1. 以下のコマンドでリポジトリをクローンします：
+
+```bash
+git clone https://github.com/yourusername/soracom-handson-20250424.git
+cd soracom-handson-20250424
+```
+
 ### 仮想環境の作成（推奨）
 
 1. 以下のコマンドで仮想環境を作成します：
@@ -104,26 +126,6 @@ pip list
    - flask: Webサーバー用
    - python-dotenv: 環境変数管理用
 
-## 0.3 ハンズオンリポジトリダウンロード
-
-### Gitのインストール確認
-
-1. ターミナルを開き、以下のコマンドを実行してGitのバージョンを確認します：
-
-```bash
-git --version
-```
-
-2. Gitがインストールされていない場合は、[Git公式サイト](https://git-scm.com/downloads)からダウンロードしてインストールしてください。
-
-### リポジトリのクローン
-
-1. 以下のコマンドでリポジトリをクローンします：
-
-```bash
-git clone https://github.com/yourusername/soracom-handson-20250424.git
-cd soracom-handson-20250424
-```
 
 ## 0.4 YOLOモデルについて
 

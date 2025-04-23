@@ -53,12 +53,9 @@ bash src/vsim/setup_raspi.sh
 
 ### SORACOMコンソールでのvSIM発行
 
-1. [SORACOMコンソール](https://console.soracom.io/)にログインします。
-2. 左側のメニューから「SIM管理」を選択します。
-3. 「SIMを登録」ボタンをクリックします。
-4. 「仮想SIM（vSIM）を作成」を選択します。
-5. 必要な情報を入力し、「登録」ボタンをクリックします。
-6. 発行されたvSIMの情報（IMSI、パスコード）をメモします。
+こちらの手順に従って、プライマリサブスクリプションのバーチャル SIM/Subscriberを発行します。
+
+https://users.soracom.io/ja-jp/docs/arc/create-virtual-sim-and-connect-with-wireguard/
 
 ### Raspberry PiへのvSIM設定
 

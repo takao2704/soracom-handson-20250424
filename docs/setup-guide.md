@@ -71,7 +71,8 @@ python -m venv venv
 2. 仮想環境を有効化します：
 
 - Windows:
-```bash
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 venv\Scripts\activate
 ```
 

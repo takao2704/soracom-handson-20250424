@@ -1,0 +1,18 @@
+{
+  "authKeyId": "keyId-xxxxxxxxxxxx",
+  "authKey": "secret-xxxxxxxxxxxx",
+  "soracam": {
+    "defaultCameraId": "YOUR_CAMERA_ID"
+  },
+  "vsim": {
+    "imsi": "YOUR_IMSI",
+    "passcode": "YOUR_PASSCODE"
+  },
+  "openai": {
+    "apiKey": "YOUR_OPENAI_API_KEY"
+  },
+  "aws": {
+    "region": "ap-northeast-1",
+    "endpoint": "https://your-api-gateway-endpoint.execute-api.ap-northeast-1.amazonaws.com/prod"
+  }
+}

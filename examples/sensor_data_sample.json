@@ -1,0 +1,12 @@
+{
+  "device_id": "raspberry-pi-001",
+  "timestamp": "2025-04-24T10:15:30Z",
+  "payload": {
+    "temperature": 23.45,
+    "humidity": 52.18,
+    "location": {
+      "lat": 35.6895,
+      "lon": 139.6917
+    }
+  }
+}

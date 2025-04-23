@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ソラカメ MPEG-DASHプレーヤー</title>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <style>
+        :root {
+            /* SORACOM Design System Colors */
+            --color-brand-primary: #00A7CF;
+            --color-brand-secondary: #0078AB;
+            --color-brand-tertiary: #004F71;
+            
+            --color-ink-lightest: #FFFFFF;
+            --color-ink-lighter: #F5F5F5;
+            --color-ink-light: #E0E0E0;
+            --color-ink-base: #9E9E9E;
+            --color-ink-dark: #616161;
+            --color-ink-darker: #424242;
+            --color-ink-darkest: #212121;
+            
+            --color-status-success: #4CAF50;
+            --color-status-warning: #FF9800;
+            --color-status-error: #F44336;
+            --color-status-info: #2196F3;
+            
+            --font-family-primary: 'Aeonik', 'Source Han Sans', sans-serif;
+            --font-family-code: 'Source Code Pro', monospace;
+            
+            --border-radius: 4px;
+            --spacing-unit: 8px;
+            --transition-duration: 0.2s;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-ink-lightest: #212121;
+                --color-ink-lighter: #424242;
+                --color-ink-light: #616161;
+                --color-ink-base: #9E9E9E;
+                --color-ink-dark: #E0E0E0;
+                --color-ink-darker: #F5F5F5;
+                --color-ink-darkest: #FFFFFF;
+                
+                --color-brand-primary: #00C3F0;
+            }
+        }
+        
+        body {
+            font-family: var(--font-family-primary);
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-ink-lighter);
+            color: var(--color-ink-darkest);
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: calc(var(--spacing-unit) * 3);
+        }
+        
+        .card {
+            background-color: var(--color-ink-lightest);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: calc(var(--spacing-unit) * 3);
+            margin-bottom: calc(var(--spacing-unit) * 3);
+        }
+        
+        h1 {
+            color: var(--color-brand-primary);
+            margin-top: 0;
+            font-weight: 500;
+            font-size: 24px;
+            line-height: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: calc(var(--spacing-unit) * 2);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: var(--spacing-unit);
+            font-weight: 500;
+            color: var(--color-ink-darker);
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: calc(var(--spacing-unit) * 1.5);
+            box-sizing: border-box;
+            border: 1px solid var(--color-ink-light);
+            border-radius: var(--border-radius);
+            font-family: var(--font-family-primary);
+            font-size: 14px;
+            color: var(--color-ink-darkest);
+            background-color: var(--color-ink-lightest);
+            transition: border-color var(--transition-duration) ease;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--color-brand-primary);
+            box-shadow: 0 0 0 2px rgba(0, 167, 207, 0.2);
+        }
+        
+        .ds-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: var(--font-family-primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
+            background-color: var(--color-ink-light);
+            color: var(--color-ink-darkest);
+        }
+        
+        .ds-button:hover {
+            background-color: var(--color-ink-base);
+        }
+        
+        .ds-button.--primary {
+            background-color: var(--color-brand-primary);
+            color: white;
+        }
+        
+        .ds-button.--primary:hover {
+            background-color: var(--color-brand-secondary);
+        }
+        
+        .video-container {
+            margin-top: calc(var(--spacing-unit) * 3);
+            position: relative;
+            width: 100%;
+            background-color: var(--color-ink-darkest);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        video {
+            width: 100%;
+            display: block;
+        }
+        
+        .instructions {
+            margin-bottom: calc(var(--spacing-unit) * 3);
+            padding: calc(var(--spacing-unit) * 2);
+            background-color: var(--color-ink-lighter);
+            border-left: 4px solid var(--color-brand-primary);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+        
+        .instructions pre {
+            background-color: var(--color-ink-darkest);
+            color: var(--color-ink-lightest);
+            padding: calc(var(--spacing-unit) * 1.5);
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+            font-family: var(--font-family-code);
+            font-size: 13px;
+        }
+        
+        .error {
+            color: var(--color-status-error);
+            margin-top: var(--spacing-unit);
+            display: none;
+            font-size: 14px;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: calc(var(--spacing-unit) * 3);
+        }
+        
+        .logo {
+            width: 24px;
+            height: 24px;
+            margin-right: var(--spacing-unit);
+        }
+        
+        .logo-text {
+            font-weight: 500;
+            font-size: 18px;
+            color: var(--color-brand-primary);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: calc(var(--spacing-unit) * 2);
+            }
+            
+            h1 {
+                font-size: 20px;
+                line-height: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <svg class="logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                <path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" fill="currentColor"/>
+            </svg>
+            <span class="logo-text">SORACOM</span>
+        </div>
+        
+        <div class="card">
+            <h1>ソラカメ MPEG-DASHプレーヤー</h1>
+            
+            <div class="instructions">
+                <p>このページでは、ソラカメのMPEG-DASH形式のストリーミング映像を再生できます。</p>
+                <p>以下のコマンドを実行して、ストリーミングURLを取得してください：</p>
+                <pre>python src/soracam/get_streaming_url.py --device_id YOUR_CAMERA_ID</pre>
+                <p>取得したURLを下のフォームに貼り付けて、「再生」ボタンをクリックしてください。</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="mpd-url">MPEG-DASH URL (.mpd):</label>
+                <input type="text" id="mpd-url" placeholder="https://example.com/stream.mpd">
+            </div>
+            
+            <button class="ds-button --primary" onclick="playVideo()">
+                <span>再生</span>
+            </button>
+            <div id="error-message" class="error"></div>
+        </div>
+        
+        <div class="video-container">
+            <video id="video-player" controls></video>
+        </div>
+    </div>
+
+    <script>
+        function playVideo() {
+            const url = document.getElementById('mpd-url').value.trim();
+            const videoPlayer = document.getElementById('video-player');
+            const errorMessage = document.getElementById('error-message');
+            
+            if (!url) {
+                errorMessage.textContent = 'URLを入力してください。';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // URLにmpdが含まれているかチェック（クエリパラメータを考慮）
+            if (!url.includes('.mpd')) {
+                errorMessage.textContent = 'MPEG-DASH形式のURL（.mpdファイルを含むURL）を入力してください。';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            errorMessage.style.display = 'none';
+            
+            // 既存のプレーヤーを破棄
+            if (window.player) {
+                window.player.destroy();
+            }
+            
+            // 新しいプレーヤーを初期化
+            window.player = dashjs.MediaPlayer().create();
+            window.player.initialize(videoPlayer, url, true);
+            
+            // エラーハンドリング
+            window.player.on(dashjs.MediaPlayer.events.ERROR, function(e) {
+                console.error('DASH.js error:', e);
+                errorMessage.textContent = '再生中にエラーが発生しました: ' + (e.error ? e.error.message : '不明なエラー');
+                errorMessage.style.display = 'block';
+            });
+        }
+        
+        // ダークモード検出
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        function handleDarkModeChange(e) {
+            document.documentElement.classList.toggle('dark-mode', e.matches);
+        }
+        darkModeMediaQuery.addEventListener('change', handleDarkModeChange);
+        handleDarkModeChange(darkModeMediaQuery);
+    </script>
+</body>
+</html>

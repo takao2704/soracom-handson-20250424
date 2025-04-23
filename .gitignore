@@ -1,0 +1,79 @@
+# OS固有のファイル
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# エディタ/IDE固有のファイル
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ログファイル
+*.log
+
+# 環境変数ファイル
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 依存関係ディレクトリ
+node_modules/
+vendor/
+bower_components/
+
+# ビルド成果物
+dist/
+build/
+out/
+target/
+
+# キャッシュディレクトリ
+.cache/
+.npm/
+.eslintcache
+
+# その他
+*.bak
+*.tmp
+*.temp
+
+# Python関連
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.env/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# プロジェクト特有
+runs/
+*.pt
+
+# 画像・動画ファイル
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.wmv
+*.flv
+*.webm
+*.m4v
+image_analysis.txt
+*export_id

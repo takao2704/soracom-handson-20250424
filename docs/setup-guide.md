@@ -28,7 +28,13 @@
 1. このリポジトリのルートディレクトリに `.env` ファイルを作成します：
 
 ```bash
+# macOS/Linux
 touch .env
+
+# Windows (PowerShell)
+New-Item -Path .env -ItemType File -Force
+# または
+$null > .env
 ```
 
 2. テキストエディタで `.env` ファイルを開き、以下の内容を追加します：

@@ -78,7 +78,7 @@ git --version
 1. 以下のコマンドでリポジトリをクローンします：
 
 ```bash
-git clone https://github.com/yourusername/soracom-handson-20250424.git
+git clone https://github.com/takao2704/soracom-handson-20250424.git
 cd soracom-handson-20250424
 ```
 

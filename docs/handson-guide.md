@@ -69,8 +69,8 @@
 - vSIMの発行
 - SORACOMへのセンサ模擬データ送信（HTTP）
 - SORACOMへのセンサ模擬データ送信（UDP）(+alpha)
-- SORACOM Beamを介したデータ送信（HTTP to HTTPS）
-- SORACOM Beamを介したデータ送信（UDP to HTTPS）(+alpha)
+- SORACOM Funnelを介したデータ送信（HTTP to HTTPS）
+- SORACOM Funnelを介したデータ送信（UDP to HTTPS）(+alpha)
 
 ### 詳細手順
 

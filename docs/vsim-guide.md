@@ -14,10 +14,10 @@
 ### OSの確認
 
 1. Raspberry Piの電源を入れ、OSが正常に起動することを確認します。
-2. ターミナルを開き、以下のコマンドでOSのバージョンを確認します：
+2. sshクライアントで、pi@raspberrypi.localに接続します。
 
 ```bash
-cat /etc/os-release
+ssh pi@raspberrypi.local
 ```
 
 ### ネットワーク設定
@@ -37,17 +37,8 @@ ip addr
 ```bash
 sudo apt update
 sudo apt install -y curl netcat-openbsd jq
+sudo apt install wireguard
 ```
-
-### セットアップスクリプトの実行
-
-1. 以下のコマンドを実行して、セットアップスクリプトを実行します：
-
-```bash
-bash src/vsim/setup_raspi.sh
-```
-
-2. スクリプトが正常に完了したことを確認します。
 
 ## 2.2 vSIMの発行
 
@@ -59,22 +50,12 @@ https://users.soracom.io/ja-jp/docs/arc/create-virtual-sim-and-connect-with-wire
 
 ### Raspberry PiへのvSIM設定
 
-1. 以下のコマンドを実行して、vSIMの設定ファイルを作成します：
+1. 発行したvSIMの接続情報を、
+`/etc/wireguard/wg0.conf`に保存します。
 
+2. wireguardインターフェースを作成し、SORACOMに接続します。
 ```bash
-cat > vsim_config.json << EOF
-{
-  "imsi": "あなたのIMSI",
-  "passcode": "あなたのパスコード"
-}
-EOF
-```
-
-2. 設定ファイルを適切な場所に移動します：
-
-```bash
-sudo mkdir -p /etc/soracom
-sudo mv vsim_config.json /etc/soracom/
+sudo wg-quick up wg0
 ```
 
 ### 接続テスト
@@ -82,14 +63,17 @@ sudo mv vsim_config.json /etc/soracom/
 1. 以下のコマンドを実行して、vSIMの接続をテストします：
 
 ```bash
-curl -s https://api.soracom.io/v1/subscribers/$(cat /etc/soracom/vsim_config.json | jq -r .imsi) \
-  -H "X-Soracom-API-Key: ${SORACOM_AUTH_KEY_ID}" \
-  -H "X-Soracom-Token: ${SORACOM_AUTH_KEY}"
+ping pong.soracom.io
 ```
 
 2. 正常にレスポンスが返ってくることを確認します。
 
 ## 2.3 SORACOMへのセンサ模擬データ送信（HTTP）
+
+### SORACOM Harvest Dataの有効化
+1. 下記のガイドに従って、SORACOM Harvest Dataを有効化します：
+
+https://users.soracom.io/ja-jp/docs/harvest/enable-data/
 
 ### センサーデータの生成と送信
 
@@ -115,11 +99,8 @@ generate_sensor_data() {
 {
   "temperature": $temp,
   "humidity": $humidity,
-  "location": {
-    "lat": $lat,
-    "lon": $lon
-  },
-  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  "lat": $lat,
+  "lon": $lon
 }
 EOF
 }
@@ -132,7 +113,7 @@ send_data() {
   curl -X POST \
     -H "Content-Type: application/json" \
     -d "$data" \
-    https://api.soracom.io/v1/devices/data
+    http://uni.soracom.io:80
     
   echo -e "\n送信完了: $(date)"
 }
@@ -178,11 +159,8 @@ generate_sensor_data() {
 {
   "temperature": $temp,
   "humidity": $humidity,
-  "location": {
-    "lat": $lat,
-    "lon": $lon
-  },
-  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  "lat": $lat,
+  "lon": $lon
 }
 EOF
 }
@@ -204,146 +182,40 @@ send_data
 
 ### 送信確認
 
-1. SORACOMコンソールにログインします。
-2. 左側のメニューから「ログ」を選択します。
-3. UDPで送信したデータのログが表示されていることを確認します。
-
-## 2.5 SORACOM Beamを介したデータ送信（HTTP to HTTPS）
-
-### SORACOM Beamの設定
-
-1. SORACOMコンソールにログインします。
-2. 左側のメニューから「グループ」を選択します。
-3. 使用するグループを選択するか、新しいグループを作成します。
-4. 「SORACOM Beam設定」を選択します。
-5. 「追加」ボタンをクリックします。
-6. 以下の設定を行います：
-   - エントリ名: 任意の名前
-   - 転送先サービス: AWS IoT
-   - 転送先URL: AWSから提供されたエンドポイント
-   - 認証情報: AWSから提供された認証情報
-7. 「保存」ボタンをクリックします。
-
-### データの送信
-
-1. 以下のコマンドを実行して、Beam経由でデータを送信します：
-
+1. 以下のコマンドを実行して、HTTPでFunnelにデータを送信します：
+（先ほどと同じ）
 ```bash
-bash src/vsim/send_beam_http.sh
+bash src/vsim/send_http.sh
 ```
 
-2. スクリプトの内容は以下の通りです：
+## 2.5 SORACOM Funnelを介したデータ送信（HTTP to HTTPS）
 
-```bash
-#!/bin/bash
+### HTTP to HTTPS SORACOM Funnelの設定
 
-# センサーデータの生成
-generate_sensor_data() {
-  local temp=$(echo "scale=2; 20 + $(od -An -N1 -i /dev/urandom) % 10" | bc)
-  local humidity=$(echo "scale=2; 40 + $(od -An -N1 -i /dev/urandom) % 30" | bc)
-  local lat="35.$(od -An -N2 -i /dev/urandom | tr -d ' ')"
-  local lon="139.$(od -An -N2 -i /dev/urandom | tr -d ' ')"
-  
-  cat << EOF
-{
-  "temperature": $temp,
-  "humidity": $humidity,
-  "location": {
-    "lat": $lat,
-    "lon": $lon
-  },
-  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-}
-EOF
-}
-
-# データの送信
-send_data() {
-  local data=$(generate_sensor_data)
-  echo "送信データ: $data"
-  
-  curl -X POST \
-    -H "Content-Type: application/json" \
-    -d "$data" \
-    https://uni.soracom.io/
-    
-  echo -e "\n送信完了: $(date)"
-}
-
-# メイン処理
-echo "SORACOM Beam経由でセンサーデータを送信します..."
-send_data
-```
+1. SORACOMコンソールにログインします。
+2. 下記を参考にHTTP to HTTPSのSORACOM Funnelを設定します：
+https://users.soracom.io/ja-jp/docs/funnel/aws-iot/#%e3%82%b9%e3%83%86%e3%83%83%e3%83%97-3-funnel-%e3%82%92%e3%82%bb%e3%83%83%e3%83%88%e3%82%a2%e3%83%83%e3%83%97%e3%81%99%e3%82%8b
 
 ### AWSでの確認
 
 1. AWSマネジメントコンソールにログインします。
-2. 提供されたAWSサービス（DynamoDB、S3など）にアクセスします。
-3. 送信したデータが保存されていることを確認します。
+2. テストクライアントで確認します。
 
 ## 2.6 SORACOM Beamを介したデータ送信（UDP to HTTPS）(+alpha)
 
-### UDP to HTTPS変換の設定
+### UDP to HTTPS変換のSORACOM Funnelの設定
 
 1. SORACOMコンソールにログインします。
-2. 左側のメニューから「グループ」を選択します。
-3. 使用するグループを選択します。
-4. 「SORACOM Beam設定」を選択します。
-5. 「追加」ボタンをクリックします。
-6. 以下の設定を行います：
-   - エントリ名: 任意の名前
-   - プロトコル: UDP
-   - 転送先サービス: AWS IoT
-   - 転送先URL: AWSから提供されたエンドポイント
-   - 認証情報: AWSから提供された認証情報
-7. 「保存」ボタンをクリックします。
+2. 下記を参考にUDP to HTTPSのSORACOM Funnelを設定します：
+https://users.soracom.io/ja-jp/docs/funnel/aws-iot/#%e3%82%b9%e3%83%86%e3%83%83%e3%83%97-3-funnel-%e3%82%92%e3%82%bb%e3%83%83%e3%83%88%e3%82%a2%e3%83%83%e3%83%97%e3%81%99%e3%82%8b
+
 
 ### データの送信
 
 1. 以下のコマンドを実行して、UDP経由でBeamにデータを送信します：
-
+（先ほどと同じ）
 ```bash
-bash src/vsim/send_beam_udp.sh
-```
-
-2. スクリプトの内容は以下の通りです：
-
-```bash
-#!/bin/bash
-
-# センサーデータの生成
-generate_sensor_data() {
-  local temp=$(echo "scale=2; 20 + $(od -An -N1 -i /dev/urandom) % 10" | bc)
-  local humidity=$(echo "scale=2; 40 + $(od -An -N1 -i /dev/urandom) % 30" | bc)
-  local lat="35.$(od -An -N2 -i /dev/urandom | tr -d ' ')"
-  local lon="139.$(od -An -N2 -i /dev/urandom | tr -d ' ')"
-  
-  cat << EOF
-{
-  "temperature": $temp,
-  "humidity": $humidity,
-  "location": {
-    "lat": $lat,
-    "lon": $lon
-  },
-  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-}
-EOF
-}
-
-# データの送信
-send_data() {
-  local data=$(generate_sensor_data)
-  echo "送信データ: $data"
-  
-  echo "$data" | nc -u -w1 uni.soracom.io 23080
-    
-  echo -e "\n送信完了: $(date)"
-}
-
-# メイン処理
-echo "UDP経由でSORACOM Beamにセンサーデータを送信します..."
-send_data
+bash src/vsim/send_udp.sh
 ```
 
 ### 応用例
